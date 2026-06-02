@@ -5,6 +5,9 @@ export type DemoAgentMode = 'mock' | 'live';
 export type DemoLiveTransport = 'custom-fetch' | 'ag-ui-client';
 
 export const demoAgentConfig = {
+  get logConversation() {
+    return localStorage.getItem('logConversation') === 'true';
+  },
   mode: 'mock' as DemoAgentMode,
   liveTransport: 'custom-fetch' as DemoLiveTransport,
   liveEndpoint:

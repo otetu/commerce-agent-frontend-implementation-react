@@ -89,6 +89,10 @@ export class DemoConversationFacade {
       return;
     }
 
+    if (demoAgentConfig.logConversation) {
+      console.log('[conversation]', { timestamp: new Date().toISOString(), threadId: this.threadId(), prompt: message });
+    }
+
     this.startRun(message);
 
     this.agent
