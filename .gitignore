@@ -1,4 +1,5 @@
-/node_modules
-/dist
-/.angular/cache
+node_modules
+dist
+*.local
 .DS_Store
+.claude

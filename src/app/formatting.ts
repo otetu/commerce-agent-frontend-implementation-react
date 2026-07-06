@@ -1,9 +1,11 @@
-const audCurrencyFormatter = new Intl.NumberFormat('en-AU', {
+import { demoAgentConfig } from './demo-agent.config';
+
+const currencyFormatter = new Intl.NumberFormat(undefined, {
   style: 'currency',
-  currency: 'AUD',
-  maximumFractionDigits: 0
+  currency: demoAgentConfig.liveRequestDefaults.currency || 'USD',
+  maximumFractionDigits: 0,
 });
 
-export function formatAudPrice(value: number): string {
-  return audCurrencyFormatter.format(value);
+export function formatPrice(value: number): string {
+  return currencyFormatter.format(value);
 }

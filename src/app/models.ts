@@ -1,4 +1,4 @@
-// Shared frontend contract types for the Angular sample.
+// Shared frontend contract types for the React sample.
 // These types model the AG-UI event stream, the A2UI operation payloads,
 // and the renderable commerce surface shapes used across the app.
 export type ChatRole = 'user' | 'assistant';
@@ -301,6 +301,7 @@ export type CommerceSurfaceComponentType =
   | 'ComparisonSummary'
   | 'BundleDisplay'
   | 'NextActionsBar'
+  | 'ProductResearchCard'
   | 'ProductCard';
 
 export type ProductCarouselSurface = {
@@ -354,9 +355,19 @@ export type NextActionsBarSurface = {
   isLoading: boolean;
 };
 
+export type ProductResearchCardSurface = {
+  surfaceId: string;
+  componentType: 'ProductResearchCard';
+  summary: string;
+  bullets: string[];
+  product: ProductRecord | null;
+  isLoading: boolean;
+};
+
 export type RenderableCommerceSurface =
   | ProductCarouselSurface
   | ComparisonTableSurface
   | ComparisonSummarySurface
   | BundleDisplaySurface
-  | NextActionsBarSurface;
+  | NextActionsBarSurface
+  | ProductResearchCardSurface;

@@ -1,7 +1,9 @@
-// Local mock scenarios used by the storefront sample.
+// Local mock scenarios used by the Conversational Discovery sample.
 // These examples are intentionally small and exist to exercise the frontend
-// rendering contract, not to represent a full production catalog.
-import { BundleTierConfig, NextAction, ProductRecord, ValueMapEntry } from './models';
+// rendering contract, not to represent a full production catalog. Products
+// are generic placeholders themed for a security / low-voltage distribution
+// catalog (cameras, recorders, cabling) — swap freely per integration.
+import type { BundleTierConfig, NextAction, ProductRecord, ValueMapEntry } from './models';
 
 export type MockToolCall = {
   name: string;
@@ -9,87 +11,91 @@ export type MockToolCall = {
   result?: string;
 };
 
-const sofas: ProductRecord[] = [
+function placeholderImage(label: string): string {
+  return `https://placehold.co/800x800/e8ecff/4338ca.png?text=${encodeURIComponent(label)}`;
+}
+
+const cameras: ProductRecord[] = [
   {
-    ec_product_id: 'sofa-arc-3-seat',
-    ec_name: 'Arc 3 Seat Sofa',
-    ec_brand: 'Freedom',
-    ec_price: 2499,
-    ec_promo_price: 2199,
-    ec_image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
-    clickUri: '/products/arc-3-seat-sofa',
-    description: 'Soft curved profile with a deep sit for relaxed living rooms.',
-    accent: '#b98d68',
-    material: 'Textured fabric',
-    seats: '3',
-    style: 'Contemporary'
+    ec_product_id: 'cam-dome-4mp',
+    ec_name: '4MP Indoor Dome IP Camera',
+    ec_brand: 'SecureLine',
+    ec_price: 249,
+    ec_promo_price: 219,
+    ec_image: placeholderImage('Dome\nCamera'),
+    clickUri: '/products/4mp-indoor-dome-ip-camera',
+    description: 'Discreet ceiling-mount dome for retail floors and offices.',
+    accent: '#8fa1d6',
+    resolution: '4MP',
+    form_factor: 'Dome',
+    connectivity: 'PoE'
   },
   {
-    ec_product_id: 'sofa-haven-modular',
-    ec_name: 'Haven Modular Sofa',
-    ec_brand: 'Freedom',
-    ec_price: 3299,
-    ec_image: 'https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=1200&q=80',
-    clickUri: '/products/haven-modular-sofa',
-    description: 'Modular design with a lounge-first shape for family rooms.',
-    accent: '#9a7658',
-    material: 'Performance fabric',
-    seats: '4+',
-    style: 'Relaxed'
+    ec_product_id: 'cam-bullet-8mp',
+    ec_name: '8MP Outdoor Bullet IP Camera',
+    ec_brand: 'SecureLine',
+    ec_price: 329,
+    ec_image: placeholderImage('Bullet\nCamera'),
+    clickUri: '/products/8mp-outdoor-bullet-ip-camera',
+    description: 'Weatherproof 4K bullet with long-range IR for perimeters.',
+    accent: '#7286c4',
+    resolution: '8MP (4K)',
+    form_factor: 'Bullet',
+    connectivity: 'PoE'
   },
   {
-    ec_product_id: 'sofa-marlow-leather',
-    ec_name: 'Marlow Leather Sofa',
-    ec_brand: 'Freedom',
-    ec_price: 3899,
-    ec_image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?auto=format&fit=crop&w=1200&q=80',
-    clickUri: '/products/marlow-leather-sofa',
-    description: 'Clean-lined leather sofa with a dressier feel for formal spaces.',
-    accent: '#7d624d',
-    material: 'Leather',
-    seats: '3',
-    style: 'Tailored'
+    ec_product_id: 'cam-ptz-5mp',
+    ec_name: '5MP PTZ Outdoor Camera',
+    ec_brand: 'SecureLine',
+    ec_price: 599,
+    ec_image: placeholderImage('PTZ\nCamera'),
+    clickUri: '/products/5mp-ptz-outdoor-camera',
+    description: 'Pan-tilt-zoom coverage when one camera has to watch a wide area.',
+    accent: '#5c6eb0',
+    resolution: '5MP',
+    form_factor: 'PTZ',
+    connectivity: 'PoE+'
   }
 ];
 
-const livingBundleSlots: Record<string, ProductRecord[]> = {
-  'bundle-surface-sofa': [sofas[0]],
-  'bundle-surface-coffee-table': [
+const surveillanceBundleSlots: Record<string, ProductRecord[]> = {
+  'bundle-surface-camera': [cameras[0]],
+  'bundle-surface-recorder': [
     {
-      ec_product_id: 'living-orbit-coffee',
-      ec_name: 'Orbit Coffee Table',
-      ec_brand: 'Freedom',
-      ec_price: 899,
-      ec_image: 'https://images.unsplash.com/photo-1533090481720-856c6e3c1fdc?auto=format&fit=crop&w=1200&q=80',
-      clickUri: '/products/orbit-coffee-table',
-      description: 'Rounded coffee table to soften a lounge layout.',
-      accent: '#9b7b60'
+      ec_product_id: 'nvr-8ch-poe',
+      ec_name: '8-Channel PoE NVR (2TB)',
+      ec_brand: 'SecureLine',
+      ec_price: 499,
+      ec_image: placeholderImage('8-Ch\nNVR'),
+      clickUri: '/products/8-channel-poe-nvr-2tb',
+      description: 'Network video recorder with built-in PoE ports and 2TB storage.',
+      accent: '#8fa1d6'
     }
   ],
-  'bundle-surface-rug': [
+  'bundle-surface-cabling': [
     {
-      ec_product_id: 'rug-linden-neutral',
-      ec_name: 'Linden Neutral Rug',
-      ec_brand: 'Freedom',
-      ec_price: 699,
-      ec_image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
-      clickUri: '/products/linden-neutral-rug',
-      description: 'Soft neutral rug for grounding a living room seating area.',
-      accent: '#cab59a'
+      ec_product_id: 'cable-cat6-305m',
+      ec_name: 'Cat6 UTP Cable — 305m Box',
+      ec_brand: 'SecureLine',
+      ec_price: 129,
+      ec_image: placeholderImage('Cat6\nCable'),
+      clickUri: '/products/cat6-utp-cable-305m-box',
+      description: 'Pull-box of riser-rated Cat6 to wire every drop on the job.',
+      accent: '#a9b6de'
     }
   ]
 };
 
-const sofaActions: NextAction[] = [
-  { text: 'Compare the top two sofas', type: 'followup' },
-  { text: 'Show modular sofas under $3500', type: 'search' },
-  { text: 'What coffee tables work with these sofas?', type: 'followup' }
+const cameraActions: NextAction[] = [
+  { text: 'Compare the top two cameras', type: 'followup' },
+  { text: 'Show 4K cameras under $400', type: 'search' },
+  { text: 'What NVRs work with these cameras?', type: 'followup' }
 ];
 
 const bundleActions: NextAction[] = [
-  { text: 'Swap the rug for something darker', type: 'followup' },
-  { text: 'Show a warmer timber coffee table', type: 'search' },
-  { text: 'Build a bedroom bundle instead', type: 'search' }
+  { text: 'Swap the NVR for a 16-channel model', type: 'followup' },
+  { text: 'Add a second dome camera', type: 'followup' },
+  { text: 'Build an access control bundle instead', type: 'search' }
 ];
 
 export type MockScenario = {
@@ -338,7 +344,7 @@ function buildBundleSnapshot(
     messageId,
     activityType: 'a2ui-surface',
     operations: [
-      ...Object.entries(livingBundleSlots).flatMap(([surfaceId, products]) => [
+      ...Object.entries(surveillanceBundleSlots).flatMap(([surfaceId, products]) => [
         {
           beginRendering: {
             surfaceId,
@@ -517,7 +523,7 @@ function buildBundleSkeleton() {
               id: 'root-bundle-display-surface',
               component: {
                 BundleDisplay: {
-                  title: { literalString: 'Building a Freedom room set' },
+                  title: { literalString: 'Building a surveillance kit' },
                   isLoading: true
                 }
               }
@@ -563,12 +569,12 @@ function buildNextActionsSkeleton() {
 export function getMockScenario(prompt: string): MockScenario {
   const normalized = prompt.toLowerCase();
 
-  if (normalized.includes('bundle') || normalized.includes('room set')) {
+  if (normalized.includes('bundle') || normalized.includes('kit')) {
     return {
       intro:
-        'I put together a Freedom living room bundle with a soft contemporary sofa, a rounded coffee table, and a neutral rug so the space feels cohesive without getting too heavy.',
+        'I put together a small-business surveillance kit with a discreet dome camera, an 8-channel PoE recorder, and the cabling to wire every drop, so the install is covered end to end from one order.',
       reasoningText:
-        'The request points toward a coordinated room recommendation rather than a single product shortlist. A compact bundle with a sofa, coffee table, and rug should make the shopping intent clearer.',
+        'The request points toward a coordinated project recommendation rather than a single product shortlist. A compact kit with a camera, a recorder, and cabling should make the install intent clearer.',
       toolCalls: [
         {
           name: 'route',
@@ -577,7 +583,7 @@ export function getMockScenario(prompt: string): MockScenario {
         },
         {
           name: 'render_bundle_display',
-          args: '{"bundleType":"living_room_refresh"}',
+          args: '{"bundleType":"small_business_surveillance"}',
           result: 'Prepared structured bundle surface.'
         },
         {
@@ -587,7 +593,7 @@ export function getMockScenario(prompt: string): MockScenario {
         }
       ],
       textChunks: splitText(
-        'I put together a Freedom living room bundle with a soft contemporary sofa, a rounded coffee table, and a neutral rug so the space feels cohesive without getting too heavy.'
+        'I put together a small-business surveillance kit with a discreet dome camera, an 8-channel PoE recorder, and the cabling to wire every drop, so the install is covered end to end from one order.'
       ),
       stateSnapshot: {
         policy_execution_state: {
@@ -599,20 +605,20 @@ export function getMockScenario(prompt: string): MockScenario {
           ],
           iteration_count: 3
         },
-        label: 'Assembling a room bundle'
+        label: 'Assembling a surveillance kit'
       },
       activitySnapshots: [
         buildBundleSkeleton(),
         buildNextActionsSkeleton(),
-        buildBundleSnapshot('activity-bundle', 'Freedom living room refresh', [
+        buildBundleSnapshot('activity-bundle', 'Small-business surveillance kit', [
           {
             bundleId: 'tier-starter',
-            label: 'Starter set',
-            description: 'A balanced lounge setup for everyday living.',
+            label: 'Starter kit',
+            description: 'A balanced camera, recorder, and cabling setup for a first install.',
             slots: [
-              { categoryLabel: 'Sofa', surfaceRef: 'bundle-surface-sofa' },
-              { categoryLabel: 'Coffee table', surfaceRef: 'bundle-surface-coffee-table' },
-              { categoryLabel: 'Rug', surfaceRef: 'bundle-surface-rug' }
+              { categoryLabel: 'Camera', surfaceRef: 'bundle-surface-camera' },
+              { categoryLabel: 'Recorder', surfaceRef: 'bundle-surface-recorder' },
+              { categoryLabel: 'Cabling', surfaceRef: 'bundle-surface-cabling' }
             ]
           }
         ], bundleActions)
@@ -623,9 +629,9 @@ export function getMockScenario(prompt: string): MockScenario {
   if (normalized.includes('compare') || normalized.includes('vs')) {
     return {
       intro:
-        'I compared three Freedom sofa directions so you can weigh layout flexibility, material feel, and how formal you want the room to read.',
+        'I compared three camera directions so you can weigh image resolution, form factor, and how much coverage a single unit needs to deliver.',
       reasoningText:
-        'The shopper is asking for tradeoffs, so comparison is more useful than a simple product list. The key attributes are material, seating capacity, and style direction.',
+        'The shopper is asking for tradeoffs, so comparison is more useful than a simple product list. The key attributes are resolution, form factor, and connectivity.',
       toolCalls: [
         {
           name: 'route',
@@ -634,12 +640,12 @@ export function getMockScenario(prompt: string): MockScenario {
         },
         {
           name: 'coveo_commerce_search',
-          args: '{"query":"Freedom sofas","limit":3}',
-          result: 'Retrieved three sofa candidates.'
+          args: '{"query":"IP cameras","limit":3}',
+          result: 'Retrieved three camera candidates.'
         },
         {
           name: 'render_comparison_table',
-          args: '{"attributes":["material","seats","style"]}',
+          args: '{"attributes":["resolution","form_factor","connectivity"]}',
           result: 'Prepared comparison surface.'
         },
         {
@@ -649,7 +655,7 @@ export function getMockScenario(prompt: string): MockScenario {
         }
       ],
       textChunks: splitText(
-        'I compared three Freedom sofa directions so you can weigh layout flexibility, material feel, and how formal you want the room to read.'
+        'I compared three camera directions so you can weigh image resolution, form factor, and how much coverage a single unit needs to deliver.'
       ),
       stateSnapshot: {
         policy_execution_state: {
@@ -664,16 +670,16 @@ export function getMockScenario(prompt: string): MockScenario {
         label: 'Comparing products'
       },
       activitySnapshots: [
-        buildComparisonSkeleton('comparison-surface-sofas', 'Comparing Freedom sofas'),
+        buildComparisonSkeleton('comparison-surface-cameras', 'Comparing IP cameras'),
         buildNextActionsSkeleton(),
         buildComparisonSnapshot(
           'activity-compare',
-          'comparison-surface-sofas',
-          'Freedom sofas to compare',
-          sofas,
-          ['material', 'seats', 'style'],
-          'Haven is the most flexible if you want a family-room modular layout, Arc feels softer and more design-led, and Marlow is the dressiest choice if leather is a priority.',
-          sofaActions
+          'comparison-surface-cameras',
+          'IP cameras to compare',
+          cameras,
+          ['resolution', 'form_factor', 'connectivity'],
+          'The 8MP bullet gives you the sharpest image per dollar for perimeters, the 4MP dome is the most discreet choice for indoor retail, and the PTZ is the pick when one camera has to sweep a wide area.',
+          cameraActions
         )
       ]
     };
@@ -681,9 +687,9 @@ export function getMockScenario(prompt: string): MockScenario {
 
   return {
     intro:
-      'I found a few Freedom sofa directions that cover modular, curved, and leather looks so you can decide whether the room should feel softer, more flexible, or a little more tailored.',
+      'I found a few camera directions that cover dome, bullet, and PTZ form factors so you can decide whether discretion, reach, or flexible coverage matters most for the install.',
     reasoningText:
-      'The request is broad, so a shortlist is the best first response. The set should cover distinct styles so the shopper can react to a direction rather than a single product.',
+      'The request is broad, so a shortlist is the best first response. The set should cover distinct form factors so the shopper can react to a direction rather than a single product.',
     toolCalls: [
       {
         name: 'route',
@@ -692,12 +698,12 @@ export function getMockScenario(prompt: string): MockScenario {
       },
       {
         name: 'coveo_commerce_search',
-        args: '{"query":"Freedom sofas","style":"soft living room","limit":3}',
-        result: 'Retrieved sofa shortlist.'
+        args: '{"query":"IP cameras","use_case":"small business install","limit":3}',
+        result: 'Retrieved camera shortlist.'
       },
       {
         name: 'render_product_carousel',
-        args: '{"surface":"products-surface-sofas"}',
+        args: '{"surface":"products-surface-cameras"}',
         result: 'Prepared product carousel.'
       },
       {
@@ -707,7 +713,7 @@ export function getMockScenario(prompt: string): MockScenario {
       }
     ],
     textChunks: splitText(
-      'I found a few Freedom sofa directions that cover modular, curved, and leather looks so you can decide whether the room should feel softer, more flexible, or a little more tailored.'
+      'I found a few camera directions that cover dome, bullet, and PTZ form factors so you can decide whether discretion, reach, or flexible coverage matters most for the install.'
     ),
     stateSnapshot: {
       policy_execution_state: {
@@ -719,20 +725,20 @@ export function getMockScenario(prompt: string): MockScenario {
         ],
         iteration_count: 3
       },
-      label: 'Searching Freedom sofas'
+      label: 'Searching cameras'
     },
     activitySnapshots: [
         buildCarouselSkeleton(
-          'products-surface-sofas',
-          'Pulling together Freedom sofas that fit a softer living room'
+          'products-surface-cameras',
+          'Pulling together cameras that fit a small business install'
         ),
         buildNextActionsSkeleton(),
         buildProductCarouselSnapshot(
           'activity-products',
-          'products-surface-sofas',
-          'Freedom sofas for a softer living room',
-          sofas,
-          sofaActions
+          'products-surface-cameras',
+          'Cameras for a small business install',
+          cameras,
+          cameraActions
         )
       ]
     };
