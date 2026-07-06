@@ -484,20 +484,6 @@ Drop the contents of `dist/` onto Netlify, Vercel, GitHub Pages, or
 S3/CloudFront. For SPA-style hosting, ensure 404s rewrite to `index.html`
 so deep links work.
 
-### Notable runtime decisions
-
-- **No Coveo Headless SDK.** The /converse and /querySuggest calls are
-  hand-rolled `fetch` calls so the bundle stays small and the integration
-  is transparent to read.
-- **Framework-light state.** Application state lives in small observable
-  stores (see [`store.ts`](src/app/store.ts)) consumed via
-  `useSyncExternalStore` — the direct React counterpart of the Angular
-  original's signal-based services, and trivially portable to any state
-  library (Zustand, Redux, Jotai…).
-- **No router.** The demo lives at `/`. Classic search submits go through
-  the configurable `handleClassicSearch` hook so you can wire whatever
-  router/storefront you embed in.
-
 ---
 
 ## License & attribution
