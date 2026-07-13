@@ -27,6 +27,11 @@ type StorefrontSearchBoxProps = {
   disabled?: boolean;
   classicPlaceholder?: string;
   generativePlaceholder?: string;
+  /**
+   * When false (live mode), the curated popular-queries grid is hidden —
+   * the entries describe the mock catalog, not the connected organization.
+   */
+  showPopularQueries?: boolean;
   onSubmitGenerative: (prompt: string) => void;
   /** Called with true while the search box is expanded (dropdown open). */
   onExpandedChange?: (expanded: boolean) => void;
@@ -36,6 +41,7 @@ export function StorefrontSearchBox({
   disabled = false,
   classicPlaceholder = 'Search products, brands, and categories',
   generativePlaceholder = 'Ask the AI product assistant…',
+  showPopularQueries = true,
   onSubmitGenerative,
   onExpandedChange,
 }: StorefrontSearchBoxProps) {
@@ -69,8 +75,8 @@ export function StorefrontSearchBox({
   // Surface a fresh set of popular queries whenever conversational intent
   // is detected (generative mode flips on).
   const prompts = useMemo(
-    () => (generativeMode ? pickPopularQueries() : []),
-    [generativeMode],
+    () => (generativeMode && showPopularQueries ? pickPopularQueries() : []),
+    [generativeMode, showPopularQueries],
   );
 
   // Mirror the dropdown/expanded state to the parent so it can de-emphasize

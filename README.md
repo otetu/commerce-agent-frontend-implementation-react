@@ -109,6 +109,10 @@ per integration. Everything below lives in that file.
 Suggestion chips rendered inside the empty state, before the user has
 typed or sent anything. Each chip submits its `text` as a prompt.
 
+**Mock mode only.** The chips describe the mock catalog, so the app hides
+them automatically in live mode (the empty state shows a plain prompt
+instead). Re-theme the list when you wire your own catalog.
+
 ```ts
 quickActionChips: NextAction[] = [
   { text: 'Show me security cameras', type: 'search' },
@@ -125,6 +129,9 @@ forwarded but currently unused — it exists because the agent-driven
 
 Drives the **popular-queries** dropdown (the one that appears when the user
 toggles the sparkle / the search box detects conversational intent).
+
+**Mock mode only.** Like the quick-action chips, the curated queries
+describe the mock catalog and are hidden automatically in live mode.
 
 | Field | Purpose |
 |---|---|

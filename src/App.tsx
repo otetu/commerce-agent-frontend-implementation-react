@@ -14,6 +14,9 @@ import { useStoreState } from './app/store';
 export default function App() {
   const conversation = useStoreState(conversationStore);
   const [searchExpanded, setSearchExpanded] = useState(false);
+  // The canned conversation starters (empty-state chips + popular-queries
+  // grid) describe the mock catalog, so they only render in mock mode.
+  const showStarters = conversation.agentMode !== 'live';
 
   return (
     <main className="shell">
@@ -24,6 +27,7 @@ export default function App() {
         </div>
         <StorefrontSearchBox
           disabled={conversation.busy}
+          showPopularQueries={showStarters}
           onSubmitGenerative={(prompt) => conversationStore.submitPrompt(prompt)}
           onExpandedChange={setSearchExpanded}
         />
@@ -52,6 +56,7 @@ export default function App() {
             toolActivity={conversation.toolActivity}
             surfaces={conversation.surfaces}
             completedTurns={conversation.completedTurns}
+            showQuickActions={showStarters}
             onResetConversation={() => conversationStore.resetConversation()}
             onQuickAction={(action) => conversationStore.useQuickAction(action)}
           />

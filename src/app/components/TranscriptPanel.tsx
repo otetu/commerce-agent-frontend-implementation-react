@@ -23,6 +23,11 @@ type TranscriptPanelProps = {
   toolActivity: ToolActivity[];
   surfaces: RenderableCommerceSurface[];
   completedTurns: ConversationTurn[];
+  /**
+   * When false (live mode), the demo's canned quick-start chips are hidden —
+   * they describe the mock catalog, not the connected organization.
+   */
+  showQuickActions?: boolean;
   onResetConversation: () => void;
   onQuickAction: (action: string) => void;
 };
@@ -33,6 +38,7 @@ export function TranscriptPanel({
   toolActivity,
   surfaces,
   completedTurns,
+  showQuickActions = true,
   onResetConversation,
   onQuickAction,
 }: TranscriptPanelProps) {
@@ -90,19 +96,25 @@ export function TranscriptPanel({
       <div className="transcript" ref={scrollContainerRef}>
         {turns.length === 0 && (
           <div className="empty-state">
-            <p>No messages yet. Try one of these to get started:</p>
-            <div className="empty-state-chips">
-              {quickActionChips.map((chip) => (
-                <button
-                  key={chip.text}
-                  type="button"
-                  className="empty-state-chip"
-                  onClick={() => onQuickAction(chip.text)}
-                >
-                  {chip.text}
-                </button>
-              ))}
-            </div>
+            {showQuickActions ? (
+              <>
+                <p>No messages yet. Try one of these to get started:</p>
+                <div className="empty-state-chips">
+                  {quickActionChips.map((chip) => (
+                    <button
+                      key={chip.text}
+                      type="button"
+                      className="empty-state-chip"
+                      onClick={() => onQuickAction(chip.text)}
+                    >
+                      {chip.text}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p>No messages yet. Ask the assistant about your catalog to get started.</p>
+            )}
           </div>
         )}
 
