@@ -21,3 +21,29 @@ export const demoAgentConfig = {
     clientId: '',
   },
 };
+
+/**
+ * One-click connection presets shown in the Live connection panel. Each
+ * fills the organization, region, tracking id, and locale in one click.
+ * The Bearer token is never part of a preset — it's short-lived and must
+ * be taken live from the customer experience (DevTools → Network → copy
+ * the Authorization header from any Coveo request).
+ *
+ * Empty by default. Add one entry per organization you demo against:
+ *
+ *   { label: 'Acme', orgId: 'acmeproduction1a2b3c4d', region: 'na',
+ *     trackingId: 'acme_en_us', language: 'en', country: 'US', currency: 'USD' }
+ */
+export type LiveConnectionPreset = {
+  /** Button label in the Connection panel. */
+  label: string;
+  orgId: string;
+  /** Region key ('au' | 'na' | 'eu' | 'dev', '' = endpoint default). */
+  region: string;
+  trackingId: string;
+  language: string;
+  country: string;
+  currency: string;
+};
+
+export const livePresets: LiveConnectionPreset[] = [];

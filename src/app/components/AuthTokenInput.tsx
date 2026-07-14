@@ -2,9 +2,31 @@
 // that mirrors the conversation-controls button. The Bearer token, org ID and
 // request defaults live in a popover that opens on click.
 import { useEffect, useRef, useState } from 'react';
-import { demoAgentConfig } from '../demo-agent.config';
+import { demoAgentConfig, livePresets, type LiveConnectionPreset } from '../demo-agent.config';
 import { authTokenStore } from '../services/auth-token-store';
 import { useStoreState } from '../store';
+
+/**
+ * Fill every connection field from a preset — except the Bearer token,
+ * which is short-lived and must be pasted live from the experience.
+ */
+function applyPreset(preset: LiveConnectionPreset): void {
+  authTokenStore.setOrgId(preset.orgId);
+  authTokenStore.setRegion(preset.region);
+  authTokenStore.setTrackingId(preset.trackingId);
+  authTokenStore.setLanguage(preset.language);
+  authTokenStore.setCountry(preset.country);
+  authTokenStore.setCurrency(preset.currency);
+}
+
+function clearOverrides(): void {
+  authTokenStore.clearOrgId();
+  authTokenStore.clearRegion();
+  authTokenStore.setTrackingId('');
+  authTokenStore.setLanguage('');
+  authTokenStore.setCountry('');
+  authTokenStore.setCurrency('');
+}
 
 export function AuthTokenInput() {
   const auth = useStoreState(authTokenStore);
@@ -24,7 +46,13 @@ export function AuthTokenInput() {
 
   const defaults = demoAgentConfig.liveRequestDefaults;
   const hasToken = auth.token.length > 0;
-  const hasOverrides = auth.orgId.length > 0 || auth.region.length > 0;
+  const hasOverrides =
+    auth.orgId.length > 0 ||
+    auth.region.length > 0 ||
+    auth.trackingId.length > 0 ||
+    auth.language.length > 0 ||
+    auth.country.length > 0 ||
+    auth.currency.length > 0;
   const maskedPreview = hasToken ? `••••${auth.token.slice(-4)}` : '';
   const resolvedEndpoint = authTokenStore.resolveEndpoint(demoAgentConfig.liveEndpoint);
   const defaultOrgId = extractOrgId(demoAgentConfig.liveEndpoint);
@@ -53,6 +81,15 @@ export function AuthTokenInput() {
           <p className="auth-token-help">
             Paste a Bearer token issued for your Coveo organization and the organization ID to
             exercise the live conversational endpoint. Both are stored locally in your browser.
+            {livePresets.length > 0 && (
+              <>
+                {' '}
+                Use the{' '}
+                <strong>{livePresets.map((preset) => preset.label).join(' / ')}</strong> shortcut
+                to fill in a known organization — then paste a fresh token taken live from that
+                experience.
+              </>
+            )}
           </p>
 
           <label className="auth-token-field">
@@ -104,14 +141,22 @@ export function AuthTokenInput() {
                 <option value="eu">EU</option>
                 <option value="dev">Dev</option>
               </select>
+              {livePresets.map((preset) => (
+                <button
+                  key={preset.label}
+                  type="button"
+                  className="ghost-button"
+                  title={`${preset.orgId} · ${preset.region.toUpperCase()} · ${preset.trackingId}`}
+                  onClick={() => applyPreset(preset)}
+                >
+                  {preset.label}
+                </button>
+              ))}
               <button
                 type="button"
                 className="ghost-button"
                 disabled={!hasOverrides}
-                onClick={() => {
-                  authTokenStore.clearOrgId();
-                  authTokenStore.clearRegion();
-                }}
+                onClick={clearOverrides}
               >
                 Reset
               </button>
