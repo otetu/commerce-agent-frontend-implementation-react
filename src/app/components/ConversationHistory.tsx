@@ -6,11 +6,20 @@ import { useEffect, useRef, useState } from 'react';
 import { historyCopy } from '../discovery-config';
 import { conversationHistoryStore } from '../services/conversation-history-store';
 import { useStoreState } from '../store';
+import { ExportConversationsDialog } from './ExportConversationsDialog';
 
 export function ConversationHistory() {
   const history = useStoreState(conversationHistoryStore);
   const [open, setOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  const exportButtonRef = useRef<HTMLButtonElement>(null);
+
+  const closeExport = () => {
+    setExportOpen(false);
+    // Restore focus to the trigger so keyboard users are not stranded.
+    exportButtonRef.current?.focus();
+  };
 
   useEffect(() => {
     const onDocumentClick = (event: MouseEvent) => {
@@ -58,6 +67,28 @@ export function ConversationHistory() {
         </span>
         <span className="newchat-label">{historyCopy.newConversationLabel}</span>
       </button>
+
+      <button
+        type="button"
+        ref={exportButtonRef}
+        className="export-button"
+        onClick={() => setExportOpen(true)}
+        aria-haspopup="dialog"
+        aria-label="Export conversations"
+      >
+        <span className="export-icon" aria-hidden="true">
+          ⇩
+        </span>
+        <span className="export-label">Export</span>
+      </button>
+
+      {exportOpen && (
+        <ExportConversationsDialog
+          records={history.conversations}
+          initialSelectedId={history.activeId}
+          onClose={closeExport}
+        />
+      )}
 
       <div className="history" ref={wrapperRef}>
         <button

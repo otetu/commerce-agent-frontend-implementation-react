@@ -2,9 +2,18 @@
 // view at submit time.
 import { useEffect, useMemo, useRef } from 'react';
 import { quickActionChips } from '../discovery-config';
-import type { ConversationTurn, ToolActivity } from '../conversation.interfaces';
+import type {
+  AnswerFeedback,
+  ConversationTurn,
+  SessionFeedback,
+  ToolActivity,
+  TurnTelemetry,
+} from '../conversation.interfaces';
 import { renderMarkdown } from '../markdown';
 import type { ChatMessage, RenderableCommerceSurface } from '../models';
+import type { FeedbackReceipt, FeedbackSubmissionV1 } from '../services/feedback-sink';
+import { AnswerFeedbackControl } from './AnswerFeedbackControl';
+import { SessionFeedbackControl } from './SessionFeedbackControl';
 import { SurfaceOutlet } from './SurfaceOutlet';
 
 type TurnView = {
@@ -23,6 +32,10 @@ type TranscriptPanelProps = {
   toolActivity: ToolActivity[];
   surfaces: RenderableCommerceSurface[];
   completedTurns: ConversationTurn[];
+  busy: boolean;
+  answerFeedbackByTurnId: Record<string, AnswerFeedback>;
+  sessionFeedback: SessionFeedback | null;
+  turnTelemetryByTurnId: Record<string, TurnTelemetry>;
   /**
    * When false (live mode), the demo's canned quick-start chips are hidden —
    * they describe the mock catalog, not the connected organization.
@@ -30,6 +43,7 @@ type TranscriptPanelProps = {
   showQuickActions?: boolean;
   onResetConversation: () => void;
   onQuickAction: (action: string) => void;
+  onSubmitFeedback: (submission: FeedbackSubmissionV1) => Promise<FeedbackReceipt>;
 };
 
 export function TranscriptPanel({
@@ -38,9 +52,14 @@ export function TranscriptPanel({
   toolActivity,
   surfaces,
   completedTurns,
+  busy,
+  answerFeedbackByTurnId,
+  sessionFeedback,
+  turnTelemetryByTurnId,
   showQuickActions = true,
   onResetConversation,
   onQuickAction,
+  onSubmitFeedback,
 }: TranscriptPanelProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const lastScrolledTurnId = useRef<string | null>(null);
@@ -69,6 +88,8 @@ export function TranscriptPanel({
 
     return [...past, liveTurn];
   }, [messages, reasoningText, toolActivity, surfaces, completedTurns]);
+
+  const hasAssistantAnswer = turns.some((turn) => turn.assistantText.length > 0);
 
   // When a new live turn starts, animate the window scroll so it lands near
   // the top of the viewport while the prior turn stays reachable above.
@@ -118,68 +139,102 @@ export function TranscriptPanel({
           </div>
         )}
 
-        {turns.map((turn) => (
-          <section
-            key={turn.id}
-            className={`turn${turn.isLive ? ' turn-live' : ''}`}
-            data-turn-id={turn.id}
-          >
-            {turn.userText && (
-              <article className="bubble user-bubble">
-                <p className="bubble-role">You</p>
-                <p className="bubble-text">{turn.userText}</p>
-              </article>
-            )}
+        {turns.map((turn) => {
+          const telemetry = turnTelemetryByTurnId[turn.id];
+          return (
+            <section
+              key={turn.id}
+              className={`turn${turn.isLive ? ' turn-live' : ''}`}
+              data-turn-id={turn.id}
+            >
+              {turn.userText && (
+                <article className="bubble user-bubble">
+                  <p className="bubble-role">You</p>
+                  <p className="bubble-text">{turn.userText}</p>
+                </article>
+              )}
 
-            {turn.isLive && hasProgress(turn) && (
-              <details className="progress-block">
-                <summary>
-                  <span>{progressLabel(turn)}</span>
-                  <small>{turn.toolActivity.length} steps</small>
-                </summary>
-                <div className="progress-content">
-                  {turn.reasoningText && (
-                    <p className="progress-reasoning">{turn.reasoningText}</p>
-                  )}
-                  {turn.toolActivity.length > 0 && (
-                    <ul className="progress-list">
-                      {turn.toolActivity.map((tool) => (
-                        <li key={tool.id}>
-                          <span>{formatToolName(tool.name)}</span>
-                          <small>{tool.status === 'running' ? 'Running' : 'Done'}</small>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+              {turn.isLive && hasProgress(turn) && (
+                <details className="progress-block">
+                  <summary>
+                    <span>{progressLabel(turn)}</span>
+                    <small>{turn.toolActivity.length} steps</small>
+                  </summary>
+                  <div className="progress-content">
+                    {turn.reasoningText && (
+                      <p className="progress-reasoning">{turn.reasoningText}</p>
+                    )}
+                    {turn.toolActivity.length > 0 && (
+                      <ul className="progress-list">
+                        {turn.toolActivity.map((tool) => (
+                          <li key={tool.id}>
+                            <span>{formatToolName(tool.name)}</span>
+                            <small>{tool.status === 'running' ? 'Running' : 'Done'}</small>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                </details>
+              )}
+
+              {turn.assistantText && (
+                <article className="bubble assistant-bubble">
+                  <p className="bubble-role">Assistant</p>
+                  <div
+                    className="bubble-text bubble-markdown"
+                    dangerouslySetInnerHTML={{ __html: renderMarkdown(turn.assistantText) }}
+                  />
+                </article>
+              )}
+
+              {telemetry?.outcome === 'failed' && (
+                <div className="turn-status turn-status-error" role="alert">
+                  <strong>The request failed.</strong>{' '}
+                  {telemetry.error?.message ?? 'The agent request failed.'}
+                  {turn.assistantText && ' The answer above may be incomplete.'}
                 </div>
-              </details>
-            )}
+              )}
+              {telemetry?.outcome === 'cancelled' && (
+                <div className="turn-status" role="status">
+                  Response cancelled{turn.assistantText ? ' — the answer above may be incomplete.' : '.'}
+                </div>
+              )}
+              {telemetry?.outcome === 'interrupted' && (
+                <div className="turn-status" role="status">
+                  Response interrupted{turn.assistantText ? ' — the answer above may be incomplete.' : '.'}
+                </div>
+              )}
 
-            {turn.assistantText && (
-              <article className="bubble assistant-bubble">
-                <p className="bubble-role">Assistant</p>
-                <div
-                  className="bubble-text bubble-markdown"
-                  dangerouslySetInnerHTML={{ __html: renderMarkdown(turn.assistantText) }}
+              {turn.assistantText && (
+                <AnswerFeedbackControl
+                  turnId={turn.id}
+                  feedback={answerFeedbackByTurnId[turn.id]}
+                  disabled={turn.isLive && busy}
+                  onSubmit={onSubmitFeedback}
                 />
-              </article>
-            )}
+              )}
 
-            {turn.surfaces.length > 0 && (
-              <article className="inline-surfaces">
-                <div className="surface-stack">
-                  {turn.surfaces.map((surface) => (
-                    <SurfaceOutlet
-                      key={surface.surfaceId}
-                      surface={surface}
-                      onQuickAction={onQuickAction}
-                    />
-                  ))}
-                </div>
-              </article>
-            )}
-          </section>
-        ))}
+              {turn.surfaces.length > 0 && (
+                <article className="inline-surfaces">
+                  <div className="surface-stack">
+                    {turn.surfaces.map((surface) => (
+                      <SurfaceOutlet
+                        key={surface.surfaceId}
+                        surface={surface}
+                        onQuickAction={onQuickAction}
+                      />
+                    ))}
+                  </div>
+                </article>
+              )}
+            </section>
+          );
+        })}
+
+        {hasAssistantAnswer && (
+          <SessionFeedbackControl feedback={sessionFeedback} onSubmit={onSubmitFeedback} />
+        )}
       </div>
     </>
   );
