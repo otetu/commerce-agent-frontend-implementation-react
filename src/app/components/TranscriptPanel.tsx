@@ -27,6 +27,13 @@ type TurnView = {
 };
 
 type TranscriptPanelProps = {
+  /**
+   * Identity of the rendered conversation. Keys the session-feedback control
+   * so an unsaved draft never survives a switch to another conversation —
+   * two conversations without saved feedback are otherwise indistinguishable
+   * to the control (both render with feedback = null).
+   */
+  threadId: string;
   messages: ChatMessage[];
   reasoningText: string;
   toolActivity: ToolActivity[];
@@ -47,6 +54,7 @@ type TranscriptPanelProps = {
 };
 
 export function TranscriptPanel({
+  threadId,
   messages,
   reasoningText,
   toolActivity,
@@ -233,7 +241,11 @@ export function TranscriptPanel({
         })}
 
         {hasAssistantAnswer && (
-          <SessionFeedbackControl feedback={sessionFeedback} onSubmit={onSubmitFeedback} />
+          <SessionFeedbackControl
+            key={threadId}
+            feedback={sessionFeedback}
+            onSubmit={onSubmitFeedback}
+          />
         )}
       </div>
     </>

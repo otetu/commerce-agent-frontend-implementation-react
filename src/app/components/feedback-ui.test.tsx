@@ -8,6 +8,7 @@ import { useStoreState } from '../../app/store';
 import { AnswerFeedbackControl } from './AnswerFeedbackControl';
 import { ExportConversationsDialog } from './ExportConversationsDialog';
 import { SessionFeedbackControl } from './SessionFeedbackControl';
+import { TranscriptPanel } from './TranscriptPanel';
 
 function AnswerHarness({
   store,
@@ -137,6 +138,47 @@ describe('SessionFeedbackControl', () => {
     // The saved state is reflected back into the control.
     expect(screen.getByRole('button', { name: 'Update rating' })).toBeInTheDocument();
     expect(screen.getByRole('radio', { name: 'Partially resolved' })).toBeChecked();
+  });
+
+  it('drops an unsaved draft when the transcript switches conversations', async () => {
+    // Regression: two conversations without saved session feedback both
+    // render the control with feedback = null, so only the threadId key
+    // distinguishes them — without it, conversation A's draft could be
+    // saved as conversation B's rating.
+    const user = userEvent.setup();
+    const transcriptProps = {
+      messages: [],
+      reasoningText: '',
+      toolActivity: [],
+      surfaces: [],
+      completedTurns: [
+        {
+          id: 'turn-1',
+          userText: 'question',
+          assistantText: 'answer',
+          surfaces: [],
+          reasoningText: '',
+          toolActivity: [],
+        },
+      ],
+      busy: false,
+      answerFeedbackByTurnId: {},
+      sessionFeedback: null,
+      turnTelemetryByTurnId: {},
+      onResetConversation: () => {},
+      onQuickAction: () => {},
+      onSubmitFeedback: vi.fn(async () => ({ accepted: true as const, feedbackId: 'fb-1' })),
+    };
+
+    const { rerender } = render(<TranscriptPanel threadId="thread-a" {...transcriptProps} />);
+    await user.click(screen.getByRole('radio', { name: 'Not resolved' }));
+    await user.type(screen.getByLabelText('Anything else? (optional)'), 'draft for A');
+
+    rerender(<TranscriptPanel threadId="thread-b" {...transcriptProps} />);
+
+    expect(screen.getByRole('radio', { name: 'Not resolved' })).not.toBeChecked();
+    expect(screen.getByLabelText('Anything else? (optional)')).toHaveValue('');
+    expect(screen.getByRole('button', { name: 'Save rating' })).toBeDisabled();
   });
 });
 

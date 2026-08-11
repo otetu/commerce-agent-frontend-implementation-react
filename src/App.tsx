@@ -60,6 +60,7 @@ export default function App() {
         </div>
         <article className="panel transcript-panel">
           <TranscriptPanel
+            threadId={conversation.threadId}
             messages={conversation.messages}
             reasoningText={conversation.reasoningText}
             toolActivity={conversation.toolActivity}
