@@ -22,6 +22,12 @@ The app showcases:
   preserved as the user keeps typing.
 - **Conversation history** persisted to localStorage with a header
   dropdown (select / delete / new chat).
+- **Client-side feedback & observability** — thumbs-up/down with reasons
+  and comments on every answer, a whole-conversation rating, per-turn
+  operational telemetry, and a redacted/diagnostic **JSON export** of any
+  selected conversations. A browser-local stopgap for a future Coveo
+  feedback endpoint — see
+  [Feedback, telemetry & export](#feedback-telemetry--export-client-side-stopgap).
 - A **single configuration file** ([`src/app/discovery-config.ts`](src/app/discovery-config.ts))
   that owns every demo-tunable behavior.
 
@@ -249,6 +255,59 @@ starts a fresh chat (the current one is auto-saved).
 
 ---
 
+## Feedback, telemetry & export (client-side stopgap)
+
+A browser-local implementation of answer/session feedback and operational
+telemetry, designed to be replaced by an official Coveo feedback endpoint
+later (the plan of record lives in
+[`docs/feedback-observability-plan.md`](docs/feedback-observability-plan.md)).
+
+- **Answer feedback** — thumbs-up/down under each assistant answer
+  (disabled while it streams), with optional typed reasons and a comment
+  (max 2,000 chars). Editable; edits keep the record's id and creation
+  time.
+- **Session feedback** — a "Rate this conversation" block
+  (resolved / partially resolved / not resolved + comment) once the
+  conversation has at least one answer.
+- **Turn telemetry** — per-prompt records: start / first-response /
+  finish timestamps, latency and duration, outcome
+  (`running | succeeded | failed | cancelled | interrupted`), sanitized
+  structured errors, tool and surface summaries, and the effective
+  connection context captured at submission time. Server ids (`runId`,
+  assistant `messageId`, `conversationSessionId`) are stored as optional
+  correlation data only.
+- **Errors are not chat messages** — a failed run keeps any partial
+  answer and renders a distinct error alert; cancellations and
+  interruptions render as neutral notices.
+- **Export** — the header **Export** button opens a dialog listing all
+  saved conversations (select one, many, or all) and downloads a
+  versioned JSON envelope in one of two profiles:
+  - **redacted** — transcript, feedback, telemetry, ids, structured
+    errors; excludes client id, reasoning, tool args/results, state
+    snapshots, and full surface payloads (product IDs are kept).
+  - **diagnostic** — adds those diagnostic fields; requires an explicit
+    confirmation on every download.
+  Both profiles always exclude bearer tokens, conversation continuation
+  tokens, and auth-store contents.
+- **Storage health** — persistence failures are surfaced as a
+  non-blocking warning (quota errors detected separately); the in-memory
+  state stays exportable even when writes fail.
+
+Everything is persisted inside the existing conversation records
+(localStorage key `discovery-demo-conversations`, `schemaVersion: 1` —
+older records are migrated on load). The UI submits through the
+`FeedbackSink` interface ([`services/feedback-sink.ts`](src/app/services/feedback-sink.ts));
+swapping in a remote sink later requires no UI changes.
+
+**Accepted tradeoffs** (by design, this is a demo-grade stopgap):
+
+- Feedback lifetime is bounded by conversation retention — deleting a
+  conversation or aging out of the 50-conversation cap removes its
+  feedback and telemetry.
+- Multi-tab persistence remains last-writer-wins.
+
+---
+
 ## Product CTA (PDP links)
 
 Each product tile in the carousel shows a **"View details"** CTA. All PDP
@@ -345,7 +404,13 @@ and `/querySuggest` ultimately hit.
 | [`ag-ui-client-transport.ts`](src/app/services/ag-ui-client-transport.ts) | Alternative live transport that uses the official `@ag-ui/client` SDK. |
 | [`auth-token-store.ts`](src/app/services/auth-token-store.ts) | Stores and exposes the live-connection overrides. |
 | [`query-suggestions.service.ts`](src/app/services/query-suggestions.service.ts) | Debounced Coveo `/querySuggest` client (`useQuerySuggestions` hook). |
-| [`conversation-history-store.ts`](src/app/services/conversation-history-store.ts) | Owns the localStorage list of saved conversations + the active one. Hydrates the conversation store on switch; snapshots it on every turn. |
+| [`conversation-history-store.ts`](src/app/services/conversation-history-store.ts) | Owns the localStorage list of saved conversations + the active one. Hydrates the conversation store on switch; snapshots it on every turn. Schema migration + storage health. |
+| [`feedback-sink.ts`](src/app/services/feedback-sink.ts) | `FeedbackSubmissionV1` DTO + async `FeedbackSink` boundary; `LocalFeedbackSink` validates and writes into the conversation store. |
+| [`conversation-export.ts`](src/app/services/conversation-export.ts) | Builds the versioned export envelope (turn unification, redacted/diagnostic profiles, recursive product-id collection). |
+| [`connection-context.ts`](src/app/services/connection-context.ts) | Resolves the effective connection context (org, region, locale, transport) captured into each turn's telemetry. |
+| [`AnswerFeedbackControl.tsx`](src/app/components/AnswerFeedbackControl.tsx) | Thumbs + reasons/comment form under each assistant answer. |
+| [`SessionFeedbackControl.tsx`](src/app/components/SessionFeedbackControl.tsx) | "Rate this conversation" block after the transcript. |
+| [`ExportConversationsDialog.tsx`](src/app/components/ExportConversationsDialog.tsx) | Multi-select export dialog with redacted/diagnostic downloads. |
 
 ---
 
@@ -476,6 +541,8 @@ conversation state, so refreshing the tab keeps the full episode chain.
 npm run dev        # vite dev server → http://localhost:5173/
 npm run build      # type-check + production build → dist/
 npm run preview    # serve the production build locally
+npm test           # vitest run (stores, sink, export, feedback UI)
+npm run test:watch # vitest in watch mode
 ```
 
 ### Building for static hosting
