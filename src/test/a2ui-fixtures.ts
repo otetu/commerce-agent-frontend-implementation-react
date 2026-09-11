@@ -9,6 +9,19 @@ export const carousel = (surfaceId: string, isLoading = false): A2UIOperation =>
   }
 });
 
+export const comparison = (surfaceId: string, isLoading?: boolean): A2UIOperation => ({
+  surfaceUpdate: {
+    surfaceId,
+    components: [{ id: `root-${surfaceId}`, component: {
+      ComparisonTable: {
+        heading: { literalString: surfaceId },
+        attributes: ['description'],
+        ...(isLoading === undefined ? {} : { isLoading })
+      }
+    } }]
+  }
+});
+
 export const products = (surfaceId: string, ids: string[]): A2UIOperation => ({
   dataModelUpdate: {
     surfaceId,

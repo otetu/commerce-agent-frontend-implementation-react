@@ -189,15 +189,20 @@ function draftToSurface(
         products: productsBySurface[draft.surfaceId] ?? draft.products,
         isLoading: draft.isLoading
       };
-    case 'ComparisonTable':
+    case 'ComparisonTable': {
+      const products = productsBySurface[draft.surfaceId] ?? draft.products;
       return {
         surfaceId: draft.surfaceId,
         componentType: 'ComparisonTable',
         heading: draft.heading ?? '',
         attributes: draft.attributes ?? [],
-        products: productsBySurface[draft.surfaceId] ?? draft.products,
-        isLoading: draft.isLoading
+        products,
+        // Comparison component metadata can precede its product binding. Keep
+        // the surface in a loading state until data arrives so static rows such
+        // as Price never render on their own.
+        isLoading: draft.isLoading || products.length === 0
       };
+    }
     case 'ComparisonSummary':
       return {
         surfaceId: draft.surfaceId,
@@ -431,7 +436,7 @@ export function createEmptySurfaceState(
   };
 }
 
-/** Stop carousel loading on every terminal path, including interrupted streams. */
+/** Stop product-bound loading on every terminal path, including interrupted streams. */
 export function settleSurfaceState(state: SurfaceState): SurfaceState {
   return {
     ...state,
@@ -439,7 +444,9 @@ export function settleSurfaceState(state: SurfaceState): SurfaceState {
     surfacesById: Object.fromEntries(
       Object.entries(state.surfacesById).map(([id, surface]) => [
         id,
-        surface.componentType === 'ProductCarousel' ? { ...surface, isLoading: false } : surface
+        surface.componentType === 'ProductCarousel' || surface.componentType === 'ComparisonTable'
+          ? { ...surface, isLoading: false }
+          : surface
       ])
     )
   };
@@ -448,7 +455,9 @@ export function settleSurfaceState(state: SurfaceState): SurfaceState {
 export function getRenderableSurfaces(state: SurfaceState): RenderableCommerceSurface[] {
   return Object.values(state.surfacesById)
     .filter((surface) =>
-      surface.componentType !== 'ProductCarousel' || surface.isLoading || surface.products.length > 0
+      (surface.componentType !== 'ProductCarousel' && surface.componentType !== 'ComparisonTable') ||
+      surface.isLoading ||
+      surface.products.length > 0
     )
     .sort((left, right) => state.orderById[left.surfaceId] - state.orderById[right.surfaceId]);
 }

@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import populated from '../../test/fixtures/a2ui/populated.json';
 import empty from '../../test/fixtures/a2ui/empty-carousel.json';
 import bundleEmpty from '../../test/fixtures/a2ui/no-match.json';
-import { carousel, products, snapshot } from '../../test/a2ui-fixtures';
+import { carousel, comparison, products, snapshot } from '../../test/a2ui-fixtures';
 import { createStoreHarness, emptyPersisted } from '../../test/harness';
 import type { AgUiEvent } from '../models';
 import type { ConversationStore } from './conversation-store';
@@ -24,7 +24,7 @@ function Surfaces({ store }: { store: ConversationStore }) {
 // JSON fixtures deliberately retain the wire shapes, separate from app typing.
 const events = (fixture: unknown) => fixture as AgUiEvent[];
 
-describe('carousel stream integration', () => {
+describe('commerce surface stream integration', () => {
   it('renders all 12 example products and replaces the placeholder state', () => {
     const h = createStoreHarness();
     h.store.submitPrompt('show products');
@@ -83,6 +83,32 @@ describe('carousel stream integration', () => {
       observer.next(snapshot('late', [carousel('late', true)]));
       expect(h.store.getState().surfaces.map((surface) => surface.surfaceId)).toEqual(['full']);
       expect(Object.values(h.store.getState().turnTelemetryByTurnId)[0].surfaces).toEqual([{ type: 'ProductCarousel', surfaceId: 'full' }]);
+    }
+  );
+
+  it.each(['success', 'error', 'transport-error', 'cancel', 'interrupted'] as const)(
+    'removes an unfinished comparison on %s', (ending) => {
+      const h = createStoreHarness();
+      h.store.submitPrompt('compare');
+      const observer = h.latest();
+      observer.next(snapshot('comparison', [comparison('comparison', true)]));
+      expect(h.store.getState().surfaces).toMatchObject([
+        { surfaceId: 'comparison', componentType: 'ComparisonTable', isLoading: true }
+      ]);
+
+      switch (ending) {
+        case 'success': observer.next({ type: 'RUN_FINISHED' }); break;
+        case 'error': observer.next({ type: 'RUN_ERROR', message: 'failed' }); break;
+        case 'transport-error': observer.error(new Error('connection lost')); break;
+        case 'cancel': h.store.cancelActiveRun(); break;
+        case 'interrupted': observer.complete(); break;
+      }
+
+      expect(h.store.getState().surfaces).toEqual([]);
+      expect(h.store.getState().surfaceState.surfacesById.comparison).toMatchObject({
+        products: [],
+        isLoading: false
+      });
     }
   );
 

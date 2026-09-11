@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { carousel, products, snapshot } from '../test/a2ui-fixtures';
+import { carousel, comparison, products, snapshot } from '../test/a2ui-fixtures';
 import { getMockScenario } from './mock-catalog';
 import type { ActivitySnapshotEvent } from './models';
 import {
@@ -32,6 +32,30 @@ describe('A2UI activity lifecycle', () => {
     const state = replay(loading, snapshot('a', [carousel('full'), products('full', ['p1'])]));
     expect(ids(state)).toEqual(['full']);
     expect(state.surfacesById['skeleton-a']).toBeUndefined();
+  });
+
+  it('keeps comparison metadata loading until its product data arrives', () => {
+    let state = replay(snapshot('a', [comparison('compare')]));
+    expect(state.surfacesById.compare).toMatchObject({
+      componentType: 'ComparisonTable',
+      products: [],
+      isLoading: true
+    });
+    expect(ids(state)).toEqual(['compare']);
+
+    state = applyActivitySnapshot(
+      state,
+      snapshot('a', [comparison('compare'), products('compare', ['p1', 'p2'])]).content,
+      { messageId: 'a' }
+    );
+    expect(state.surfacesById.compare).toMatchObject({ isLoading: false });
+    expect(state.surfacesById.compare).toHaveProperty('products.length', 2);
+  });
+
+  it('removes an empty comparison when the run settles', () => {
+    const state = settleSurfaceState(replay(snapshot('a', [comparison('compare', true)])));
+    expect(state.surfacesById.compare).toMatchObject({ isLoading: false, products: [] });
+    expect(ids(state)).toEqual([]);
   });
 
   it.each([{ operations: [] }, { operations: [carousel('a'), products('a', [])] }])('clears loading on empty final snapshot %#', ({ operations }) => {
