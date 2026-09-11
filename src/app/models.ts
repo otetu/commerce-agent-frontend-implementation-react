@@ -156,7 +156,12 @@ export type DataModelUpdateOperation = {
   };
 };
 
+export type DeleteSurfaceOperation = {
+  deleteSurface: { surfaceId: string };
+};
+
 export type A2UIOperation =
+  | DeleteSurfaceOperation
   | BeginRenderingOperation
   | SurfaceUpdateOperation
   | DataModelUpdateOperation

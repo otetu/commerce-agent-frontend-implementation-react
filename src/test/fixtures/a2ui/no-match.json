@@ -1,0 +1,152 @@
+[
+  {
+    "type": "ACTIVITY_SNAPSHOT",
+    "messageId": "activity-1",
+    "activityType": "a2ui-surface",
+    "content": {
+      "operations": [
+        {
+          "beginRendering": {
+            "surfaceId": "skeleton-surface-bundle-display",
+            "root": "skeleton-root-bundle-display",
+            "catalogId": "coveo-commerce-v1"
+          }
+        },
+        {
+          "surfaceUpdate": {
+            "surfaceId": "skeleton-surface-bundle-display",
+            "components": [
+              {
+                "id": "skeleton-root-bundle-display",
+                "component": {
+                  "BundleDisplay": {
+                    "title": {
+                      "literalString": ""
+                    },
+                    "isLoading": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "replace": true
+  },
+  {
+    "type": "ACTIVITY_SNAPSHOT",
+    "messageId": "activity-2",
+    "activityType": "a2ui-surface",
+    "content": {
+      "operations": [
+        {
+          "beginRendering": {
+            "surfaceId": "skeleton-surface-next-actions",
+            "root": "skeleton-root-next-actions",
+            "catalogId": "coveo-commerce-v1"
+          }
+        },
+        {
+          "surfaceUpdate": {
+            "surfaceId": "skeleton-surface-next-actions",
+            "components": [
+              {
+                "id": "skeleton-root-next-actions",
+                "component": {
+                  "NextActionsBar": {
+                    "isLoading": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "replace": true
+  },
+  {
+    "type": "ACTIVITY_SNAPSHOT",
+    "messageId": "activity-2",
+    "activityType": "a2ui-surface",
+    "content": {
+      "operations": [
+        {
+          "beginRendering": {
+            "surfaceId": "next-actions-surface",
+            "root": "root-next-actions-surface",
+            "catalogId": "coveo-commerce-v1"
+          }
+        },
+        {
+          "surfaceUpdate": {
+            "surfaceId": "next-actions-surface",
+            "components": [
+              {
+                "id": "root-next-actions-surface",
+                "component": {
+                  "NextActionsBar": {
+                    "actions": {
+                      "componentId": "button-next-actions-surface",
+                      "dataBinding": "/actions"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "dataModelUpdate": {
+            "surfaceId": "next-actions-surface",
+            "contents": [
+              {
+                "key": "actions",
+                "valueMap": [
+                  {
+                    "valueMap": [
+                      {
+                        "key": "text",
+                        "valueString": "Browse products"
+                      },
+                      {
+                        "key": "type",
+                        "valueString": "search"
+                      }
+                    ]
+                  },
+                  {
+                    "valueMap": [
+                      {
+                        "key": "text",
+                        "valueString": "Compare products"
+                      },
+                      {
+                        "key": "type",
+                        "valueString": "followup"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "replace": true
+  },
+  {
+    "type": "ACTIVITY_SNAPSHOT",
+    "messageId": "activity-1",
+    "activityType": "a2ui-surface",
+    "content": {
+      "operations": []
+    },
+    "replace": true
+  },
+  {
+    "type": "RUN_FINISHED"
+  }
+]

@@ -1,0 +1,540 @@
+[
+  {
+    "type": "ACTIVITY_SNAPSHOT",
+    "messageId": "activity-1",
+    "activityType": "a2ui-surface",
+    "content": {
+      "operations": [
+        {
+          "beginRendering": {
+            "surfaceId": "skeleton-surface-default",
+            "root": "skeleton-root-default",
+            "catalogId": "coveo-commerce-v1"
+          }
+        },
+        {
+          "surfaceUpdate": {
+            "surfaceId": "skeleton-surface-default",
+            "components": [
+              {
+                "id": "skeleton-root-default",
+                "component": {
+                  "ProductCarousel": {
+                    "heading": {
+                      "literalString": ""
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "replace": true
+  },
+  {
+    "type": "ACTIVITY_SNAPSHOT",
+    "messageId": "activity-1",
+    "activityType": "a2ui-surface",
+    "content": {
+      "operations": [
+        {
+          "beginRendering": {
+            "surfaceId": "products-surface",
+            "root": "root-products-surface",
+            "catalogId": "coveo-commerce-v1"
+          }
+        },
+        {
+          "surfaceUpdate": {
+            "surfaceId": "products-surface",
+            "components": [
+              {
+                "id": "root-products-surface",
+                "component": {
+                  "ProductCarousel": {
+                    "heading": {
+                      "literalString": "Example products"
+                    },
+                    "products": {
+                      "componentId": "product-card-products-surface",
+                      "dataBinding": "/items"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "dataModelUpdate": {
+            "surfaceId": "products-surface",
+            "contents": [
+              {
+                "key": "items",
+                "valueMap": [
+                  {
+                    "valueMap": [
+                      {
+                        "key": "ec_product_id",
+                        "valueString": "product-01"
+                      },
+                      {
+                        "key": "ec_name",
+                        "valueString": "Example Product 01"
+                      },
+                      {
+                        "key": "ec_brand",
+                        "valueString": "Example Brand"
+                      },
+                      {
+                        "key": "ec_price",
+                        "valueNumber": 101
+                      },
+                      {
+                        "key": "ec_image",
+                        "valueString": "https://example.com/images/product-01.png"
+                      },
+                      {
+                        "key": "clickUri",
+                        "valueString": "https://example.com/products/product-01"
+                      }
+                    ]
+                  },
+                  {
+                    "valueMap": [
+                      {
+                        "key": "ec_product_id",
+                        "valueString": "product-02"
+                      },
+                      {
+                        "key": "ec_name",
+                        "valueString": "Example Product 02"
+                      },
+                      {
+                        "key": "ec_brand",
+                        "valueString": "Example Brand"
+                      },
+                      {
+                        "key": "ec_price",
+                        "valueNumber": 102
+                      },
+                      {
+                        "key": "ec_image",
+                        "valueString": "https://example.com/images/product-02.png"
+                      },
+                      {
+                        "key": "clickUri",
+                        "valueString": "https://example.com/products/product-02"
+                      }
+                    ]
+                  },
+                  {
+                    "valueMap": [
+                      {
+                        "key": "ec_product_id",
+                        "valueString": "product-03"
+                      },
+                      {
+                        "key": "ec_name",
+                        "valueString": "Example Product 03"
+                      },
+                      {
+                        "key": "ec_brand",
+                        "valueString": "Example Brand"
+                      },
+                      {
+                        "key": "ec_price",
+                        "valueNumber": 103
+                      },
+                      {
+                        "key": "ec_image",
+                        "valueString": "https://example.com/images/product-03.png"
+                      },
+                      {
+                        "key": "clickUri",
+                        "valueString": "https://example.com/products/product-03"
+                      }
+                    ]
+                  },
+                  {
+                    "valueMap": [
+                      {
+                        "key": "ec_product_id",
+                        "valueString": "product-04"
+                      },
+                      {
+                        "key": "ec_name",
+                        "valueString": "Example Product 04"
+                      },
+                      {
+                        "key": "ec_brand",
+                        "valueString": "Example Brand"
+                      },
+                      {
+                        "key": "ec_price",
+                        "valueNumber": 104
+                      },
+                      {
+                        "key": "ec_image",
+                        "valueString": "https://example.com/images/product-04.png"
+                      },
+                      {
+                        "key": "clickUri",
+                        "valueString": "https://example.com/products/product-04"
+                      }
+                    ]
+                  },
+                  {
+                    "valueMap": [
+                      {
+                        "key": "ec_product_id",
+                        "valueString": "product-05"
+                      },
+                      {
+                        "key": "ec_name",
+                        "valueString": "Example Product 05"
+                      },
+                      {
+                        "key": "ec_brand",
+                        "valueString": "Example Brand"
+                      },
+                      {
+                        "key": "ec_price",
+                        "valueNumber": 105
+                      },
+                      {
+                        "key": "ec_image",
+                        "valueString": "https://example.com/images/product-05.png"
+                      },
+                      {
+                        "key": "clickUri",
+                        "valueString": "https://example.com/products/product-05"
+                      }
+                    ]
+                  },
+                  {
+                    "valueMap": [
+                      {
+                        "key": "ec_product_id",
+                        "valueString": "product-06"
+                      },
+                      {
+                        "key": "ec_name",
+                        "valueString": "Example Product 06"
+                      },
+                      {
+                        "key": "ec_brand",
+                        "valueString": "Example Brand"
+                      },
+                      {
+                        "key": "ec_price",
+                        "valueNumber": 106
+                      },
+                      {
+                        "key": "ec_image",
+                        "valueString": "https://example.com/images/product-06.png"
+                      },
+                      {
+                        "key": "clickUri",
+                        "valueString": "https://example.com/products/product-06"
+                      }
+                    ]
+                  },
+                  {
+                    "valueMap": [
+                      {
+                        "key": "ec_product_id",
+                        "valueString": "product-07"
+                      },
+                      {
+                        "key": "ec_name",
+                        "valueString": "Example Product 07"
+                      },
+                      {
+                        "key": "ec_brand",
+                        "valueString": "Example Brand"
+                      },
+                      {
+                        "key": "ec_price",
+                        "valueNumber": 107
+                      },
+                      {
+                        "key": "ec_image",
+                        "valueString": "https://example.com/images/product-07.png"
+                      },
+                      {
+                        "key": "clickUri",
+                        "valueString": "https://example.com/products/product-07"
+                      }
+                    ]
+                  },
+                  {
+                    "valueMap": [
+                      {
+                        "key": "ec_product_id",
+                        "valueString": "product-08"
+                      },
+                      {
+                        "key": "ec_name",
+                        "valueString": "Example Product 08"
+                      },
+                      {
+                        "key": "ec_brand",
+                        "valueString": "Example Brand"
+                      },
+                      {
+                        "key": "ec_price",
+                        "valueNumber": 108
+                      },
+                      {
+                        "key": "ec_image",
+                        "valueString": "https://example.com/images/product-08.png"
+                      },
+                      {
+                        "key": "clickUri",
+                        "valueString": "https://example.com/products/product-08"
+                      }
+                    ]
+                  },
+                  {
+                    "valueMap": [
+                      {
+                        "key": "ec_product_id",
+                        "valueString": "product-09"
+                      },
+                      {
+                        "key": "ec_name",
+                        "valueString": "Example Product 09"
+                      },
+                      {
+                        "key": "ec_brand",
+                        "valueString": "Example Brand"
+                      },
+                      {
+                        "key": "ec_price",
+                        "valueNumber": 109
+                      },
+                      {
+                        "key": "ec_image",
+                        "valueString": "https://example.com/images/product-09.png"
+                      },
+                      {
+                        "key": "clickUri",
+                        "valueString": "https://example.com/products/product-09"
+                      }
+                    ]
+                  },
+                  {
+                    "valueMap": [
+                      {
+                        "key": "ec_product_id",
+                        "valueString": "product-10"
+                      },
+                      {
+                        "key": "ec_name",
+                        "valueString": "Example Product 10"
+                      },
+                      {
+                        "key": "ec_brand",
+                        "valueString": "Example Brand"
+                      },
+                      {
+                        "key": "ec_price",
+                        "valueNumber": 110
+                      },
+                      {
+                        "key": "ec_image",
+                        "valueString": "https://example.com/images/product-10.png"
+                      },
+                      {
+                        "key": "clickUri",
+                        "valueString": "https://example.com/products/product-10"
+                      }
+                    ]
+                  },
+                  {
+                    "valueMap": [
+                      {
+                        "key": "ec_product_id",
+                        "valueString": "product-11"
+                      },
+                      {
+                        "key": "ec_name",
+                        "valueString": "Example Product 11"
+                      },
+                      {
+                        "key": "ec_brand",
+                        "valueString": "Example Brand"
+                      },
+                      {
+                        "key": "ec_price",
+                        "valueNumber": 111
+                      },
+                      {
+                        "key": "ec_image",
+                        "valueString": "https://example.com/images/product-11.png"
+                      },
+                      {
+                        "key": "clickUri",
+                        "valueString": "https://example.com/products/product-11"
+                      }
+                    ]
+                  },
+                  {
+                    "valueMap": [
+                      {
+                        "key": "ec_product_id",
+                        "valueString": "product-12"
+                      },
+                      {
+                        "key": "ec_name",
+                        "valueString": "Example Product 12"
+                      },
+                      {
+                        "key": "ec_brand",
+                        "valueString": "Example Brand"
+                      },
+                      {
+                        "key": "ec_price",
+                        "valueNumber": 112
+                      },
+                      {
+                        "key": "ec_image",
+                        "valueString": "https://example.com/images/product-12.png"
+                      },
+                      {
+                        "key": "clickUri",
+                        "valueString": "https://example.com/products/product-12"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "replace": true
+  },
+  {
+    "type": "ACTIVITY_SNAPSHOT",
+    "messageId": "activity-2",
+    "activityType": "a2ui-surface",
+    "content": {
+      "operations": [
+        {
+          "beginRendering": {
+            "surfaceId": "skeleton-surface-next-actions",
+            "root": "skeleton-root-next-actions",
+            "catalogId": "coveo-commerce-v1"
+          }
+        },
+        {
+          "surfaceUpdate": {
+            "surfaceId": "skeleton-surface-next-actions",
+            "components": [
+              {
+                "id": "skeleton-root-next-actions",
+                "component": {
+                  "NextActionsBar": {
+                    "isLoading": true
+                  }
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "replace": true
+  },
+  {
+    "type": "ACTIVITY_SNAPSHOT",
+    "messageId": "activity-2",
+    "activityType": "a2ui-surface",
+    "content": {
+      "operations": [
+        {
+          "beginRendering": {
+            "surfaceId": "next-actions-surface",
+            "root": "root-next-actions-surface",
+            "catalogId": "coveo-commerce-v1"
+          }
+        },
+        {
+          "surfaceUpdate": {
+            "surfaceId": "next-actions-surface",
+            "components": [
+              {
+                "id": "root-next-actions-surface",
+                "component": {
+                  "NextActionsBar": {
+                    "actions": {
+                      "componentId": "button-next-actions-surface",
+                      "dataBinding": "/actions"
+                    }
+                  }
+                }
+              }
+            ]
+          }
+        },
+        {
+          "dataModelUpdate": {
+            "surfaceId": "next-actions-surface",
+            "contents": [
+              {
+                "key": "actions",
+                "valueMap": [
+                  {
+                    "valueMap": [
+                      {
+                        "key": "text",
+                        "valueString": "Browse products"
+                      },
+                      {
+                        "key": "type",
+                        "valueString": "followup"
+                      }
+                    ]
+                  },
+                  {
+                    "valueMap": [
+                      {
+                        "key": "text",
+                        "valueString": "Compare products"
+                      },
+                      {
+                        "key": "type",
+                        "valueString": "followup"
+                      }
+                    ]
+                  },
+                  {
+                    "valueMap": [
+                      {
+                        "key": "text",
+                        "valueString": "View product details"
+                      },
+                      {
+                        "key": "type",
+                        "valueString": "followup"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "replace": true
+  },
+  {
+    "type": "RUN_FINISHED"
+  }
+]
