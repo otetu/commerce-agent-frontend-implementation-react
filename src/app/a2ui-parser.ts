@@ -4,7 +4,9 @@
 import type {
   A2UIOperation,
   ActivitySnapshotContent,
+  ActivitySnapshotEvent,
   BundleDisplayTier,
+  DeleteSurfaceOperation,
   CommerceSurfaceComponentType,
   DataModelUpdateOperation,
   NextAction,
@@ -34,6 +36,10 @@ type SurfaceDraft = {
 type SurfaceState = {
   orderById: Record<string, number>;
   surfacesById: Record<string, RenderableCommerceSurface>;
+  // Latest identified snapshots plus incremental legacy batches, in update order.
+  activities: Array<{ messageId?: string; operations: A2UIOperation[] }>;
+  restoredSurfaces: Record<string, RenderableCommerceSurface>;
+  settled: boolean;
 };
 
 function readLiteralOrPath(value: unknown): string {
@@ -183,15 +189,20 @@ function draftToSurface(
         products: productsBySurface[draft.surfaceId] ?? draft.products,
         isLoading: draft.isLoading
       };
-    case 'ComparisonTable':
+    case 'ComparisonTable': {
+      const products = productsBySurface[draft.surfaceId] ?? draft.products;
       return {
         surfaceId: draft.surfaceId,
         componentType: 'ComparisonTable',
         heading: draft.heading ?? '',
         attributes: draft.attributes ?? [],
-        products: productsBySurface[draft.surfaceId] ?? draft.products,
-        isLoading: draft.isLoading
+        products,
+        // Comparison component metadata can precede its product binding. Keep
+        // the surface in a loading state until data arrives so static rows such
+        // as Price never render on their own.
+        isLoading: draft.isLoading || products.length === 0
       };
+    }
     case 'ComparisonSummary':
       return {
         surfaceId: draft.surfaceId,
@@ -236,7 +247,7 @@ function collectDrafts(
   const productsBySurface: Record<string, ProductRecord[]> = {};
   const nextOrderById = { ...previous.orderById };
 
-  for (const existing of Object.values(previous.surfacesById)) {
+  for (const existing of Object.values(previous.restoredSurfaces)) {
     const draft = ensureDraft(
       drafts,
       nextOrderById,
@@ -269,6 +280,12 @@ function collectDrafts(
   }
 
   for (const operation of operations) {
+    if ('deleteSurface' in operation && operation.deleteSurface) {
+      const { surfaceId } = (operation as DeleteSurfaceOperation).deleteSurface;
+      delete drafts[surfaceId];
+      delete productsBySurface[surfaceId];
+      continue;
+    }
     if ('surfaceUpdate' in operation && operation.surfaceUpdate) {
       const surfaceUpdate = (operation as SurfaceUpdateOperation).surfaceUpdate;
       const surfaceId = surfaceUpdate.surfaceId;
@@ -346,50 +363,101 @@ function collectDrafts(
 
 export function applyActivitySnapshot(
   previous: SurfaceState,
-  content: ActivitySnapshotContent
+  content: ActivitySnapshotContent,
+  metadata: Pick<ActivitySnapshotEvent, 'messageId' | 'replace'> = {}
 ): SurfaceState {
-  // Activity snapshots can arrive repeatedly for the same surface. We rebuild
-  // the ordered surface map from drafts so later snapshots replace prior state
-  // while preserving stable render ordering.
-  const { drafts, productsBySurface } = collectDrafts(content.operations, previous);
-  const surfacesById: Record<string, RenderableCommerceSurface> = {};
+  if (previous.settled) {
+    return previous;
+  }
+  const { messageId, replace } = metadata;
+  const existing = messageId
+    ? previous.activities.find((activity) => activity.messageId === messageId)
+    : undefined;
+  if (existing && replace === false) {
+    return previous;
+  }
 
+  // AG-UI replaces the entire activity, not the entire turn. An empty snapshot
+  // must remove its old operations; keeping the entry also honors replace:false.
+  const activities = [
+    ...previous.activities.filter((activity) => !messageId || activity.messageId !== messageId),
+    { messageId, operations: content.operations }
+  ];
+  const { drafts, productsBySurface } = collectDrafts(
+    activities.flatMap((activity) => activity.operations),
+    previous
+  );
+  // Reuse vacated slots when a message replaces its placeholder with a new
+  // surface ID, but never take the slot of a still-active independent surface.
+  const vacatedOrders = existing?.operations.flatMap((operation) => {
+    if (!('surfaceUpdate' in operation) || !operation.surfaceUpdate) {
+      return [];
+    }
+    const { surfaceId } = (operation as SurfaceUpdateOperation).surfaceUpdate;
+    return !drafts[surfaceId] && previous.orderById[surfaceId] !== undefined
+      ? [previous.orderById[surfaceId]]
+      : [];
+  }) ?? [];
+  const availableOrders = [...new Set(vacatedOrders)].sort((left, right) => left - right);
+  const surfacesById: Record<string, RenderableCommerceSurface> = {};
   for (const draft of Object.values(drafts)) {
+    if (previous.orderById[draft.surfaceId] === undefined && availableOrders.length > 0) {
+      const order = availableOrders.shift();
+      if (order !== undefined) {
+        draft.order = order;
+      }
+    }
     const surface = draftToSurface(draft, productsBySurface);
     if (surface) {
       surfacesById[surface.surfaceId] = surface;
     }
   }
-
   return {
-    orderById: { ...previous.orderById, ...Object.fromEntries(
-      Object.values(drafts).map((draft) => [draft.surfaceId, draft.order])
-    ) },
+    ...previous,
+    activities,
+    orderById: {
+      ...previous.orderById,
+      ...Object.fromEntries(Object.values(drafts).map((draft) => [draft.surfaceId, draft.order]))
+    },
     surfacesById
   };
 }
 
-export function createEmptySurfaceState(): SurfaceState {
+export function createEmptySurfaceState(
+  restored: RenderableCommerceSurface[] = []
+): SurfaceState {
+  const surfacesById = Object.fromEntries(restored.map((surface) => [surface.surfaceId, surface]));
   return {
-    orderById: {},
-    surfacesById: {}
+    orderById: Object.fromEntries(restored.map((surface, index) => [surface.surfaceId, index])),
+    surfacesById,
+    restoredSurfaces: surfacesById,
+    activities: [],
+    settled: false
+  };
+}
+
+/** Stop product-bound loading on every terminal path, including interrupted streams. */
+export function settleSurfaceState(state: SurfaceState): SurfaceState {
+  return {
+    ...state,
+    settled: true,
+    surfacesById: Object.fromEntries(
+      Object.entries(state.surfacesById).map(([id, surface]) => [
+        id,
+        surface.componentType === 'ProductCarousel' || surface.componentType === 'ComparisonTable'
+          ? { ...surface, isLoading: false }
+          : surface
+      ])
+    )
   };
 }
 
 export function getRenderableSurfaces(state: SurfaceState): RenderableCommerceSurface[] {
-  const all = Object.values(state.surfacesById);
-  const realComponentTypes = new Set(
-    all
-      .filter((surface) => !surface.surfaceId.startsWith('skeleton-'))
-      .map((surface) => surface.componentType),
-  );
-  return all
-    .filter(
-      (surface) =>
-        !surface.surfaceId.startsWith('skeleton-') ||
-        !realComponentTypes.has(surface.componentType),
+  return Object.values(state.surfacesById)
+    .filter((surface) =>
+      (surface.componentType !== 'ProductCarousel' && surface.componentType !== 'ComparisonTable') ||
+      surface.isLoading ||
+      surface.products.length > 0
     )
-    .sort(
-      (left, right) => state.orderById[left.surfaceId] - state.orderById[right.surfaceId],
-    );
+    .sort((left, right) => state.orderById[left.surfaceId] - state.orderById[right.surfaceId]);
 }

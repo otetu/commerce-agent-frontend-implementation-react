@@ -380,7 +380,7 @@ and `/querySuggest` ultimately hit.
 | [`App.tsx`](src/App.tsx) | Top-level layout: storefront header (brand · search · controls) → workspace (transcript) → fixed composer bar. Tracks `searchExpanded` for the focus de-emphasis animation. |
 | [`discovery-config.ts`](src/app/discovery-config.ts) | All per-environment knobs. **Start here** when tuning behavior. |
 | [`models.ts`](src/app/models.ts) | TypeScript shapes for AG-UI events, A2UI ops, product records, surface types. |
-| [`a2ui-parser.ts`](src/app/a2ui-parser.ts) | Reduces a stream of A2UI operations into renderable surface state. Skeleton surfaces are auto-dismissed once their real counterpart arrives. |
+| [`a2ui-parser.ts`](src/app/a2ui-parser.ts) | Reduces a stream of A2UI operations into renderable surface state. Activity snapshots replace their prior operations by message ID, including empty replacements. Independent activities remain separate; settled empty carousels are omitted. |
 | [`markdown.ts`](src/app/markdown.ts) | Renders assistant text as markdown using `marked`. |
 | [`store.ts`](src/app/store.ts) | Tiny observable-store primitive + `useStoreState` hook (`useSyncExternalStore`). Trivially swappable for Zustand/Redux/Jotai. |
 | [`mock-catalog.ts`](src/app/mock-catalog.ts) | Generic placeholder products + the three mock scenarios (discovery, comparison, bundle). Re-theme for your catalog. |

@@ -6,6 +6,7 @@ import {
   applyActivitySnapshot,
   createEmptySurfaceState,
   getRenderableSurfaces,
+  settleSurfaceState,
 } from '../a2ui-parser';
 import {
   CONVERSATION_SCHEMA_VERSION,
@@ -152,7 +153,7 @@ export class ConversationStore extends Store<ConversationState> {
     this.inFlight = null;
     this.activeAttempt = null;
 
-    const surfaceState = createRestoredSurfaceState(conversation.surfaces);
+    const surfaceState = createEmptySurfaceState(conversation.surfaces);
     this.setState({
       agentMode: conversation.agentMode,
       threadId: conversation.threadId,
@@ -430,7 +431,7 @@ export class ConversationStore extends Store<ConversationState> {
         return false;
       case 'ACTIVITY_SNAPSHOT':
         this.setState((state) => {
-          const surfaceState = applyActivitySnapshot(state.surfaceState, event.content);
+          const surfaceState = applyActivitySnapshot(state.surfaceState, event.content, event);
           return {
             ...state,
             surfaceState,
@@ -507,6 +508,8 @@ export class ConversationStore extends Store<ConversationState> {
       if (!entry || entry.attemptId !== ref.attemptId || entry.outcome !== 'running') {
         return state;
       }
+      const surfaceState = settleSurfaceState(state.surfaceState);
+      const surfaces = getRenderableSurfaces(surfaceState);
       const startedMs = Date.parse(entry.startedAt);
       const next: TurnTelemetry = {
         ...entry,
@@ -517,13 +520,15 @@ export class ConversationStore extends Store<ConversationState> {
           : { totalMs: Math.max(0, now.getTime() - startedMs) }),
         ...(error ? { error } : {}),
         toolNames: state.toolActivity.map((tool) => ({ name: tool.name, status: tool.status })),
-        surfaces: state.surfaces.map((surface) => ({
+        surfaces: surfaces.map((surface) => ({
           type: surface.componentType,
           surfaceId: surface.surfaceId,
         })),
       };
       return {
         ...state,
+        surfaceState,
+        surfaces,
         turnTelemetryByTurnId: { ...state.turnTelemetryByTurnId, [ref.turnId]: next },
       };
     });
@@ -736,26 +741,6 @@ export class ConversationStore extends Store<ConversationState> {
       };
     });
   }
-}
-
-function createRestoredSurfaceState(surfaces: RenderableCommerceSurface[]): SurfaceState {
-  const orderById = surfaces.reduce<Record<string, number>>((result, surface, index) => {
-    result[surface.surfaceId] = index;
-    return result;
-  }, {});
-
-  const surfacesById = surfaces.reduce<Record<string, RenderableCommerceSurface>>(
-    (result, surface) => {
-      result[surface.surfaceId] = surface;
-      return result;
-    },
-    {},
-  );
-
-  return {
-    orderById,
-    surfacesById,
-  };
 }
 
 function extractStatusLabel(snapshot: Record<string, unknown>): string | null {
